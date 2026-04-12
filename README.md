@@ -274,8 +274,8 @@ Classes: `Hardhat · Mask · NO-Hardhat · NO-Mask · NO-Safety Vest · Person �
 
 ## 🧑‍💻 Author
 
-**[Your Name]** · B.Tech AIML · [Your College Name]  
-Roll No: [XXXX] · Academic Year: 2024–25
+Rishiraj Singh Tomar · B.Tech AIML · Vit Bhopal University
+Roll No:23BAI10849· Academic Year: 2025-26
 
 ---
 
