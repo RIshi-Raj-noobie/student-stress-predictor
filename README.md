@@ -1,202 +1,282 @@
-# 🧠 Student Stress Predictor
+# 🦺 Construction Site PPE Violation Detector
 
-> An AI/ML web app that predicts a student's stress level — **Low**, **Medium**, or **High** — based on daily lifestyle habits and academic data, with personalised tips to help manage it.
+> **Capstone BYOP Project · AIML (2nd Year) · Computer Vision**
+
+A real-time computer-vision system that detects **Personal Protective Equipment (PPE) violations** on construction sites — specifically workers missing helmets or safety vests — using **YOLOv8** object detection and **OpenCV**.
 
 ---
 
-## 📌 What This Project Does
+## 📌 Table of Contents
 
-Students face stress from multiple directions — heavy study schedules, poor sleep, financial pressure, and social factors. Most institutions only respond *after* a student reaches a breaking point.
+- [Problem Statement](#-problem-statement)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Example Outputs](#-example-outputs)
+- [Evaluation Metrics](#-evaluation-metrics)
+- [Dataset](#-dataset)
+- [Future Improvements](#-future-improvements)
+- [References](#-references)
 
-This project builds a **proactive machine learning system** that takes 10 simple inputs from a student and predicts their current stress level in real time. It also tells them *which habits* are contributing most to their stress.
+---
+
+## 🔍 Problem Statement
+
+Construction sites are among the **most dangerous work environments** globally. The International Labour Organization (ILO) reports that the construction sector accounts for **~17% of all workplace fatalities**, many of which are caused by workers not wearing proper PPE (helmets, vests, gloves).
+
+Manual monitoring by safety officers is costly, slow, and inconsistent. This project proposes an **automated real-time vision system** that:
+
+1. Processes live camera feeds or recorded footage.
+2. Detects workers and their PPE status (helmet / no helmet, vest / no vest).
+3. Flags violations with bounding-box annotations and an on-screen alert.
+4. Logs all violation events for audit and reporting.
 
 ---
 
 ## ✨ Features
 
-- Predicts stress level as **Low / Medium / High**
-- Compares 3 ML models and automatically picks the best one
-- Shows a **confidence breakdown** for each prediction
-- Gives **personalised tips** based on the student's inputs
-- Interactive web app — no coding required to use it
-- Clean, modular code that is easy to read and extend
+| Feature | Detail |
+|---|---|
+| 🎯 Real-time detection | YOLOv8n at ≥15 FPS on CPU |
+| 📷 Multi-input support | Image, video file, or live webcam |
+| 🔴 Violation alerts | Red bounding box + "⚠ VIOLATION" label |
+| 📊 HUD overlay | Live FPS, person count, violation count |
+| 🖥️ Streamlit dashboard | Upload & inspect images/videos in-browser |
+| 📝 Violation logging | Timestamped JSON log per session |
+| 📈 Evaluation module | mAP@0.5, Precision, Recall, F1 |
+| 🔁 Demo mode | Runs without GPU via OpenCV synthetic detections |
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Tool | Purpose |
+| Layer | Technology |
 |---|---|
-| Python 3.9+ | Core language |
-| scikit-learn | Random Forest, Logistic Regression, preprocessing |
-| XGBoost | Best-performing classifier |
-| Pandas / NumPy | Data handling |
-| Matplotlib / Seaborn | Charts and evaluation plots |
-| Streamlit | Web application UI |
-| Joblib | Saving and loading the trained model |
+| Object Detection | YOLOv8 (Ultralytics) |
+| Image Processing | OpenCV 4.x |
+| Numerical Computing | NumPy |
+| Deep Learning Backend | PyTorch (via Ultralytics) |
+| Dashboard / UI | Streamlit |
+| Data Visualisation | Matplotlib, Seaborn |
+| Language | Python 3.9 – 3.11 |
 
 ---
 
-## 📁 Folder Structure
+## 📁 Project Structure
 
 ```
-student-stress-predictor/
+construction-safety-cv/
 │
 ├── src/
-│   ├── generate_sample_data.py   # Generates a demo dataset
-│   ├── preprocess.py             # Cleans, encodes, and scales data
-│   ├── train.py                  # Trains 3 models, saves the best
-│   ├── evaluate.py               # Metrics, confusion matrix, charts
-│   └── app.py                    # Streamlit web app
+│   ├── detect.py           ← Main detection pipeline (image + video)
+│   ├── train.py            ← YOLOv8 fine-tuning script
+│   ├── evaluate.py         ← mAP, Precision, Recall, F1, IoU metrics
+│   ├── app.py              ← Streamlit dashboard
+│   └── download_data.py    ← Dataset download / setup helper
 │
 ├── data/
-│   ├── raw/                      # Original CSV file goes here
-│   └── processed/                # Preprocessed numpy arrays
+│   ├── raw/                ← Original dataset (images + YOLO labels)
+│   │   ├── train/
+│   │   ├── valid/
+│   │   ├── test/
+│   │   └── data.yaml
+│   ├── processed/          ← Augmented / pre-processed frames
+│   └── annotations/        ← Any additional annotation files
 │
-├── models/                       # Saved model, scaler, encoder
-├── notebooks/                    # EDA notebook
-├── reports/                      # Output charts and plots
-├── requirements.txt              # All dependencies
+├── models/
+│   ├── pretrained/         ← Downloaded or trained .pt weights
+│   └── trained/            ← Output from train.py (runs/)
+│
+├── notebooks/
+│   └── EDA_and_Baseline.ipynb   ← Exploratory data analysis
+│
+├── outputs/
+│   ├── detections/         ← Annotated output images
+│   ├── videos/             ← Annotated output videos
+│   └── reports/            ← Evaluation JSON / CSV reports
+│
+├── docs/
+│   └── project_report.md   ← Full academic project report
+│
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## ⚡ Setup and Installation
+## ⚙️ Installation
 
-### 1. Clone the repository
+### Prerequisites
+
+- Python **3.9 – 3.11**
+- `pip` (bundled with Python)
+- *(Optional)* NVIDIA GPU with CUDA 11.8+ for faster inference
+
+### Step 1 – Clone the repository
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/student-stress-predictor.git
-cd student-stress-predictor
+git clone https://github.com/<your-username>/construction-safety-cv.git
+cd construction-safety-cv
 ```
 
-### 2. Create a virtual environment (recommended)
+### Step 2 – Create a virtual environment (recommended)
+
 ```bash
 python -m venv venv
-
 # Windows
 venv\Scripts\activate
-
 # macOS / Linux
 source venv/bin/activate
 ```
 
-### 3. Install dependencies
+### Step 3 – Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
+> **Note:** `ultralytics` auto-installs PyTorch. If you have a GPU, install the CUDA-enabled torch first:
+> ```bash
+> pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
+> ```
+
+### Step 4 – Download the dataset (optional, for training)
+
+```bash
+python src/download_data.py --dest data/raw
+```
+
+This creates the directory structure and `data.yaml`. Download the actual images from the [Roboflow dataset link](https://universe.roboflow.com/roboflow-universe-projects/construction-site-safety) and place them in `data/raw/`.
+
 ---
 
-## 🚀 How to Run
+## 🚀 Usage
 
-Run these commands **in order** from the root of the project folder:
+### 1. Run detection on an image
 
-**Step 1 — Generate the dataset**
 ```bash
-python src/generate_sample_data.py
+python src/detect.py --source path/to/image.jpg --output outputs/detections
 ```
-Creates a file at `data/raw/student_stress.csv` with 1000 student records.
 
-**Step 2 — Preprocess the data**
+### 2. Run detection on a video
+
 ```bash
-python src/preprocess.py
+python src/detect.py --source path/to/video.mp4 --output outputs/videos --display
 ```
-Cleans, encodes, scales, and splits the data into train/test sets.
 
-**Step 3 — Train the models**
+### 3. Run detection on live webcam
+
 ```bash
-python src/train.py
+python src/detect.py --source 0 --display
 ```
-Trains Random Forest, XGBoost, and Logistic Regression. Saves the best model automatically.
 
-**Step 4 — Evaluate the model**
+### 4. Use a custom trained model
+
 ```bash
-python src/evaluate.py
+python src/detect.py --source path/to/image.jpg --model models/pretrained/ppe_yolov8n.pt
 ```
-Prints accuracy, precision, recall, and F1-score. Saves charts to `reports/`.
 
-**Step 5 — Launch the web app**
+### 5. Launch the Streamlit dashboard
+
 ```bash
 streamlit run src/app.py
 ```
-Opens the app in your browser at `http://localhost:8501`
 
----
+Then open `http://localhost:8501` in your browser.
 
-## 📊 Example Output
+### 6. Fine-tune YOLOv8 on your data
 
-```
-[TRAINING] Random Forest ...
-  ✔ Random Forest       — Accuracy: 0.8950
-[TRAINING] XGBoost ...
-  ✔ XGBoost             — Accuracy: 0.9100
-[TRAINING] Logistic Regression ...
-  ✔ Logistic Regression — Accuracy: 0.7850
-
-[RESULT] Best Model: XGBoost (Accuracy: 0.9100)
-[SAVED]  Model saved → models/best_model.pkl
+```bash
+python src/train.py --data data/raw/data.yaml --epochs 50 --batch 16 --device cpu
 ```
 
-**Classification Report:**
-```
-              precision    recall  f1-score   support
+### 7. Evaluate model performance
 
-        High       0.92      0.90      0.91        68
-         Low       0.91      0.93      0.92        71
-      Medium       0.89      0.90      0.90        61
-
-    accuracy                           0.91       200
+```bash
+python src/evaluate.py
 ```
 
 ---
 
-## 🎯 Input Features
+## 🖼️ Example Outputs
 
-| Feature | Type | Example |
+### Image Detection
+
+| Input | Output |
+|---|---|
+| Raw construction site photo | Annotated with green boxes (PPE OK) and red boxes (violations) |
+| Workers without helmets | Red bounding box with "No-Helmet ⚠ VIOLATION" label |
+
+### Video / Webcam
+
+- Live HUD showing: **Status (SAFE / UNSAFE)**, persons detected, violation count, FPS
+- Annotated output video saved to `outputs/videos/`
+
+### Dashboard
+
+- Upload image or video in browser
+- Side-by-side before/after view
+- Metric cards: persons, violations, confidence scores
+- Per-detection table with violation flags
+
+---
+
+## 📈 Evaluation Metrics
+
+| Metric | Description | Target |
 |---|---|---|
-| Study hours per day | Number | 6 |
-| Sleep hours per night | Number | 7 |
-| Physical activity (hrs/week) | Number | 3 |
-| Social media hours per day | Number | 2 |
-| Extracurricular activities | Category | None / 1–2 / 3+ |
-| Financial stress | Category | Low / Medium / High |
-| Relationship quality | Category | Poor / Average / Good |
-| Diet quality | Category | Poor / Average / Good |
-| Attendance rate (%) | Number | 80 |
-| CGPA | Number | 7.5 |
+| mAP@0.5 | Mean Average Precision at IoU=0.5 | > 0.70 |
+| Precision | TP / (TP + FP) | > 0.75 |
+| Recall | TP / (TP + FN) | > 0.70 |
+| F1-Score | Harmonic mean of P & R | > 0.72 |
+| FPS | Frames per second (CPU) | ≥ 15 |
+
+*Metrics are computed on the validation split using `src/evaluate.py`.*
 
 ---
 
 ## 📦 Dataset
 
-This project uses a **synthetic dataset** generated by `generate_sample_data.py` for demonstration purposes.
+| Dataset | Source | Images | Format |
+|---|---|---|---|
+| Construction Site Safety | [Roboflow Universe](https://universe.roboflow.com/roboflow-universe-projects/construction-site-safety) | ~2,600 | YOLOv8 |
+| PPE Detection | [Kaggle](https://www.kaggle.com/datasets/snehilsanyal/construction-site-safety-image-dataset-roboflow) | ~3,000 | YOLO |
+| COCO (persons) | [COCO](https://cocodataset.org) | 118k+ | COCO JSON |
 
-To use a real dataset, download one of these and place it at `data/raw/student_stress.csv`:
-
-- [Student Stress Factors — Kaggle](https://www.kaggle.com/datasets/rxnach/student-stress-factors-a-comprehensive-analysis)
-- [Student Mental Health — Kaggle](https://www.kaggle.com/datasets/shariful07/student-mental-health)
+Classes: `Hardhat · Mask · NO-Hardhat · NO-Mask · NO-Safety Vest · Person · Safety Cone · Safety Vest · machinery · vehicle`
 
 ---
 
 ## 🔮 Future Improvements
 
-- [ ] Add SHAP values for per-student explainability
-- [ ] Weekly stress tracking with a trend chart
-- [ ] Hyperparameter tuning using Optuna
-- [ ] Deploy on Streamlit Cloud (free hosting)
-- [ ] Mobile-friendly UI
+- **Multi-camera support** — Monitor multiple CCTV feeds simultaneously
+- **Alert system** — Send SMS/email notifications on violation detection
+- **Zone-based rules** — Define restricted areas requiring full PPE
+- **Tracking** — Use ByteTrack/DeepSORT to track workers across frames
+- **Edge deployment** — Export to ONNX / TFLite for Raspberry Pi or Jetson
+- **Larger model** — Switch from YOLOv8n → YOLOv8m for higher accuracy
+- **Glove / boot detection** — Extend to full 7-class PPE coverage
 
 ---
 
-## 👨‍💻 Author
+## 📚 References
 
-Rishiraj Singh Tomar
-3rd Year — B.Tech Artificial Intelligence & Machine Learning
-*BYOP Capstone Project*
+1. Jocher, G. et al. *YOLOv8* (2023). Ultralytics. https://github.com/ultralytics/ultralytics
+2. Redmon, J. & Farhadi, A. *YOLOv3: An Incremental Improvement* (2018). arXiv:1804.02767
+3. Bradski, G. *The OpenCV Library*. Dr. Dobb's Journal (2000).
+4. Lin, T. et al. *Microsoft COCO: Common Objects in Context* (2014). ECCV.
+5. ILO. *Safety and Health at Work*. https://www.ilo.org/global/topics/safety-and-health-at-work
+6. Roboflow. *Construction Site Safety Dataset*. https://universe.roboflow.com
 
 ---
 
-## 📄 License
+## 🧑‍💻 Author
 
-This project is licensed under the [MIT License](LICENSE).
+**[Your Name]** · B.Tech AIML · [Your College Name]  
+Roll No: [XXXX] · Academic Year: 2024–25
+
+---
+
+*This project was developed as part of the Bring Your Own Project (BYOP) Capstone for the Artificial Intelligence & Machine Learning programme.*
