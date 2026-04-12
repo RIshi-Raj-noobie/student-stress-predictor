@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Model weights (large files – store with Git LFS or separately)
+*.pt
+*.onnx
+*.tflite
+*.engine
+
+# Dataset images (download separately)
+data/raw/train/images/*
+data/raw/valid/images/*
+data/raw/test/images/*
+!data/raw/train/images/.gitkeep
+!data/raw/valid/images/.gitkeep
+!data/raw/test/images/.gitkeep
+
+# Outputs (generated at runtime)
+outputs/detections/*.jpg
+outputs/detections/*.png
+outputs/videos/*.mp4
+outputs/reports/*.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
